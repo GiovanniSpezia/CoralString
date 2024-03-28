@@ -1,3 +1,8 @@
+::selection {
+    background-color: #338bff68;
+    color: black;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
