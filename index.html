@@ -1,0 +1,371 @@
+<html>
+<head>
+    <title>CoralString</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="Logo.png">
+</head>
+<body class="desktop">
+
+<div class="navbar">
+    <img src="Logo.png" alt="" class="logo">
+    <a href="#">CoralString</a>
+    <a target="_blank" href="https://www.coralmc.it">CoralMC</a>
+    <a href="refreshcourse.html">SS Refresh Course</a>
+    <a href="simulazioni.html">SS Simulazioni</a>
+    <a href="testss.html">Test SS</a>
+    <a target="_blank" href="https://drive.google.com/file/d/11TPu4jPJ6GiQlLAuFh5W8hgVyQErEre5/view?usp=sharing">SS Guide</a>
+</div>
+
+<div class="header">
+    <h1>CoralString</h1>
+</div>
+
+<div class="menu">
+    <h2>Menu</h2>
+    <ul>
+        <li><a href="#BAM">BAM</a></li>
+        <li><a href="#ScriptControlliLogs">SCRIPT CONTROLLI LOGS</a></li>
+        <li><a href="#JournalLogs">JOURNAL LOGS</a></li>
+        <li><a href="#JournalSS">JOURNAL SS</a></li>
+        <li><a href="#JournalXRAY">JOURNAL XRAY</a></li>
+        <li><a href="#Prefetch">PREFETCH</a></li>
+        <li><a href="#Cestino">CESTINO</a></li>
+        <li><a href="#ShellRecent">SHELL RECENT</a></li>
+        <li><a href="#CartellaMinecraft">CARTELLA MINECRAFT</a></li>
+        <li><a href="#Sysmain">SYSMAIN</a></li>
+        <li><a href="#DPS">DPS</a></li>
+        <li><a href="#PCASVC">PCASVC</a></li>
+        <li><a href="#Journal">JOURNAL</a></li>
+        
+    </ul>
+</div>
+
+<div class="title" id="BAM">
+    <h1 class="centered-title">BAM</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet1" rows="10" cols="50" readonly>Clear-Host
+
+if ((Get-AuthenticodeSignature $MyInvocation.MyCommand.Path).Status -ne "Valid")
+{
+  
+  $check = [System.Windows.Forms.MessageBox]::Show($this, "WARNING:`n$(Split-path $MyInvocation.MyCommand.Path -Leaf) has been modified since it was signed.`nPress 'YES' to Continue or 'No' to Exit", "Warning", 'YESNO', 48)
+  switch ($check)
+  {
+    "YES"{ Continue }
+    "NO"{ Exit }
+  }
+}
+$sw = [Diagnostics.Stopwatch]::StartNew()
+
+if (!(Get-PSDrive -Name HKLM -PSProvider Registry)){
+    Try{New-PSDrive -Name HKLM -PSProvider Registry -Root HKEY_LOCAL_MACHINE}
+    Catch{"Error Mounting HKEY_Local_Machine"}
+}
+$bv = ("bam", "bam\State")
+Try{$Users = foreach($ii in $bv){Get-ChildItem -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$($ii)\UserSettings\" | Select-Object -ExpandProperty PSChildName}}
+Catch{
+    "Error Parsing BAM Key. Likely unsupported Windows Version"
+    exit
+}
+$rpath = @("HKLM:\SYSTEM\CurrentControlSet\Services\bam\","HKLM:\SYSTEM\CurrentControlSet\Services\bam\state\")
+
+$UserTime = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation").TimeZoneKeyName
+$UserBias = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation").ActiveTimeBias
+$UserDay = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation").DaylightBias
+
+
+$Bam = Foreach ($Sid in $Users){$u++
+            
+        foreach($rp in $rpath){
+           Write-Progress -id 1 -Activity "$($rp)"
+           $BamItems = Get-Item -Path "$($rp)UserSettings\$Sid" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Property
+           Write-Progress -id 2 -Activity "Collecting Security ID (sid) entries" -Status "($($Users.Count)) sid: $($objSID.value)" -ParentId 1 
+           $bi = 0 
+      
+            Try{
+            $objSID = New-Object System.Security.Principal.SecurityIdentifier($Sid)
+            $User = $objSID.Translate( [System.Security.Principal.NTAccount]) 
+            $User = $User.Value
+            }
+            Catch{$User=""}
+            $i=0
+            ForEach ($Item in $BamItems){$i++
+        $Key = Get-ItemProperty -Path "$($rp)UserSettings\$Sid" -ErrorAction SilentlyContinue| Select-Object -ExpandProperty $Item
+            Write-Progress -id 3 -Activity "Collecting BAM entries for SID: $($objSID.value)" -Status "(Entry $i of $($BamItems.Count))"  -ParentId 1 
+  
+            If($key.length -eq 24){
+                $Hex=[System.BitConverter]::ToString($key[7..0]) -replace "-",""
+                $TimeLocal = Get-Date ([DateTime]::FromFileTime([Convert]::ToInt64($Hex, 16))) -Format o
+          $TimeUTC = Get-Date ([DateTime]::FromFileTimeUtc([Convert]::ToInt64($Hex, 16))) -Format u
+          $Bias = -([convert]::ToInt32([Convert]::ToString($UserBias,2),2))
+          $Day = -([convert]::ToInt32([Convert]::ToString($UserDay,2),2)) 
+          $Biasd = $Bias/60
+          $Dayd = $Day/60
+          $TImeUser = (Get-Date ([DateTime]::FromFileTimeUtc([Convert]::ToInt64($Hex, 16))).addminutes($Bias) -Format s) 
+          $d = if((((split-path -path $item) | ConvertFrom-String -Delimiter "\\").P3)-match '\d{1}')
+          {((split-path -path $item).Remove(23)).trimstart("\Device\HarddiskVolume")} else {$d = ""}
+          $f = if((((split-path -path $item) | ConvertFrom-String -Delimiter "\\").P3)-match '\d{1}')
+          {Split-path -leaf ($item).TrimStart()} else {$item}  
+          $cp = if((((split-path -path $item) | ConvertFrom-String -Delimiter "\\").P3)-match '\d{1}')
+          {($item).Remove(1,23)} else {$cp = ""}
+          $path = if((((split-path -path $item) | ConvertFrom-String -Delimiter "\\").P3)-match '\d{1}')
+          {"(Vol"+$d+") "+$cp} else {$path = ""}      
+      
+                [PSCustomObject]@{
+                            'Examiner Time' = $TimeLocal
+                'Last Execution Time (UTC)'= $TimeUTC
+                'Last Execution User Time' = $TimeUser
+                 Application =   $f
+                 Path =      $path
+                 User =         $User
+                 Sid =          $Sid
+		     rpath =        $rp
+                             }}}}
+                 }
+             
+           
+
+$Bam|Out-GridView -PassThru -Title "BAM key entries $($Bam.count)  - User TimeZone: ($UserTime) -> ActiveBias: ( $Bias) - DayLightTime: ($Day)"
+
+$sw.stop()
+$t=$sw.Elapsed.TotalMinutes
+write-host "Elapsed Time $t minutes" -f yellow</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet1')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="ScriptControlliLogs" class="centered-title">SCRIPT CONTROLLI LOGS</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet2" rows="10" cols="50" readonly>
+        # Funzione per stampare l'animazione della scritta "CoralMC" con colori e formattazione
+function Print-AnimatedLogo {
+    Clear-Host
+
+    $padding = " " * 10
+    Write-Host -NoNewline ($padding)
+    Write-Host -ForegroundColor Cyan @"
+                              
+
+                              ____    ___    ____       _      _       __  __    ____         
+                             / ___|  / _ \  |  _ \     / \    | |     |  \/  |  / ___|
+                            | |     | | | | | |_| |   / _ \   | |     | |\/| | | |    
+                            | |___  | |_| | |  _ <   / ___ \  | |___  | |  | | | |___ 
+                             \____|  \___/  |_| \_\ /_/   \_\ |_____| |_|  |_|  \____|
+"@
+    Start-Sleep -Milliseconds 500
+}
+
+# Funzione per stampare il menu delle scelte
+function Print-Menu {
+    Clear-Host
+    Print-AnimatedLogo
+    Write-Host ""
+    Write-Host ""
+    Write-Host "                                            ------------------------------"
+    Write-Host "                                                       LOGS TOOL          " 
+    Write-Host "                                            ------------------------------"
+    Write-Host ""  
+    Write-Host "                                                  Client logs       [1]"
+    Write-Host "                                                  File eliminati    [2]"
+    Write-Host "                                                  File degli account[3]"
+    Write-Host "                                                  Installa Winrar   [4]"
+    Read-Host "                                                                        "
+} 
+
+while ($true) {
+    $choice = Print-Menu
+
+    switch ($choice) {
+        "1" {
+            Clear-Host
+            Write-Host "Sto cercando i log..."
+            Start-Process -FilePath "$env:APPDATA\.minecraft\logs"
+            Start-Process -FilePath "$env:APPDATA\.minecraft\logs\blclient\minecraft\" -ErrorAction SilentlyContinue
+            Start-Process -FilePath "$env:USERPROFILE\.lunarclient\offline\1.8\logs" -ErrorAction SilentlyContinue
+            Start-Process -FilePath "$env:USERPROFILE\.lunarclient\offline\multiver\logs" -ErrorAction SilentlyContinue
+            Pause
+        }
+        "2" {
+            Clear-Host
+            Write-Host "Sto cercando i logs eliminati..."
+            Set-Location C:\
+            fsutil usn readjournal C: csv | findstr /i /C:"0x80000200" | findstr /i /C:"latest.log" /i /C:".log.gz" /i /C:"launcher_profiles.json" /i /C:"usernamecache.json" /i /C:"usercache.json" /i /C:"shig.inima" /i /C:”launcher_accounts.json” > logs.txt
+            Start-Process -FilePath "notepad.exe" -ArgumentList "logs.txt"
+            Pause
+        }
+        "3" {
+            Clear-Host
+            Write-Host "Sto cercando i files..."
+            Clear-Host
+            cd $env:APPDATA\.minecraft
+            Rename-Item -Path ".\usernamecache.json" -NewName "usernamecache.txt"
+            Rename-Item -Path ".\usercache.json" -NewName "usercache.txt"
+            Rename-Item -Path ".\launcher_accounts.json" -NewName "launcher_accounts.txt"
+            Rename-Item -Path ".\launcher_profiles.json" -NewName "launcher_profiles.txt"
+            Rename-Item -Path ".\tlaucherprofiles.json" -NewName "tlaucherprofi2les.txt"
+            Start-Process -FilePath "usercache.txt"
+            Start-Process -FilePath "launcher_accounts.txt"
+            Start-Process -FilePath "launcher_profiles.txt"
+            Start-Process -FilePath "tlaucherprofiles.txt"
+            Rename-Item -Path ".\usernamecache.txt" -NewName "usernamecache.json"
+            Rename-Item -Path ".\usercache.txt" -NewName "usercache.json"
+            Rename-Item -Path ".\launcher_accounts.txt" -NewName "launcher_accounts.json"
+            Rename-Item -Path ".\launcher_profiles.txt" -NewName "launcher_profiles.json"
+            Rename-Item -Path ".\tlaucherprofiles.txt" -NewName "tlaucherprofiles.json"
+            Pause
+        }
+        "4" {
+            Clear-Host
+            $installer = Read-Host "Vuoi scaricare e installare WinRAR? (Si/No)"
+            if ($installer -eq "Si") {
+                Write-Host "Sto scaricando WinRAR..."
+                $url = 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x64-700it.exe'
+                $output = "C:\Users\$env:USERNAME\Downloads\winrar-x64-700it.exe"
+                (New-Object System.Net.WebClient).DownloadFile($url, $output)
+                Write-Host "Download di WinRAR completato."
+                Start-Process -FilePath $output
+                $confirmation = Read-Host "WinRAR è stato avviato correttamente, premi il tasto invio per andare avanti"
+            } else {
+                Write-Host "Nessun'altra opzione disponibile al momento."
+                Pause
+            }
+        }
+    }
+}
+    </textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet2')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="JournalLogs" class="centered-title">JOURNAL LOGS</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet3" rows="10" cols="50" readonly>fsutil usn readjournal C: csv | findstr /i /C:"0x80000200" | findstr /i /C:"latest.log" /i /C:".log.gz" /i /C:"launcher_profiles.json" /i /C:"usernamecache.json" /i /C:"usercache.json" /i /C:"shig.inima" /i /C:”launcher_accounts.json” > logs.txt</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet3')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="JournalSS" id="" class="centered-title">JOURNAL SS</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet4" rows="10" cols="50" readonly>fsutil usn readjournal c: csv | findstr /i /C:"0x80000200" /i /C:"0x00001000" /i  /C:"0x00002000" | findstr /i /C:".pf" /i /C:".exe" /i /C:".bat" /i /C:".cmd" /i /C:".jar" /i /C:".bat" /i /C:"?" /i /C:".pif" /i /C:"jnativehook" > ss.txt</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet4')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="JournalXRAY" class="centered-title">JOURNAL XRAY</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet5" rows="10" cols="50" readonly>fsutil usn readjournal c: csv | findstr /i /C:"%date%" | findstr /i /C:"0x80000200" /i /C:"0x00001000" /i  /C:"0x00002000" | findstr /i /C:".zip" /i /C:".rar" /i > xray.txt</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet5')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="Prefetch" class="centered-title">PREFETCH</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet6" rows="10" cols="50" readonly>C:\Windows\Prefetch</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet6')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="Cestino" class="centered-title">CESTINO</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet7" rows="10" cols="50" readonly>C:\$Recycle.bin</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet7')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="ShellRecent" class="centered-title">SHELL RECENT</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet8" rows="10" cols="50" readonly>C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Recent</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet8')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="CartellaMinecraft" class="centered-title">CARTELLA MINECRAFT</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet9" rows="10" cols="50" readonly>C:\Users\%USERNAME%\AppData\Roaming</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet9')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="Sysmain" class="centered-title">SYSMAIN</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet10" rows="10" cols="50" readonly>sc query sysmain</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet10')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="DPS" class="centered-title">DPS</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet11" rows="10" cols="50" readonly>sc query dps</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet11')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="PCASVC" class="centered-title">PCASVC</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet12" rows="10" cols="50" readonly>sc query pcasvc</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet12')">Copia</button>
+</div>
+
+<div class="title">
+    <h1 id="Journal" class="centered-title">JOURNAL</h1>
+</div>
+
+<div class="code-section">
+    <textarea id="codeSnippet13" rows="10" cols="50" readonly>fsutil usn readjournal c: csv > journal.txt</textarea>
+    <button id="copyCodeButton" onclick="copyCodeToClipboard('codeSnippet13')">Copia</button>
+</div>
+
+<div class="image-section">
+    <div class="image-container">
+        <img src="banner.png" alt="Immagine 1">
+    </div>
+</div>
+
+<div class="top-arrow" onclick="scrollToTop()">Torna Su</div>
+
+<div class="footer">
+    <p>CoralMC © 2024</p>
+</div>
+
+<script>
+    function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+    function copyCodeToClipboard(codeId) {
+        var codeSnippet = document.getElementById(codeId);
+        var textArea = document.createElement("textarea");
+        textArea.value = codeSnippet.textContent;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        alert("Copiato con successo!");
+    }
+</script>
+</body>
+</html>

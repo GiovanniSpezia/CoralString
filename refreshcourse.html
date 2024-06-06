@@ -1,0 +1,96 @@
+<html>
+<head>
+    <title>CoralString</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="Logo.png">
+    <style>
+        .fancy-box {
+            border: 2px solid #2262b6;
+            background-color: #f2f2f2;
+            color: #333;
+            padding: 20px;
+            margin: 50px;
+            border-radius: 20px;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            font-size: 22px;
+        }
+    </style>
+    <style>
+        .quiz-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        .quiz-container iframe {
+            width: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body class="desktop">
+
+<div class="navbar">
+    <img src="Logo.png" alt="" class="logo">
+    <a href="index.html">CoralString</a>
+    <a target="_blank" href="https://www.coralmc.it">CoralMC</a>
+    <a href="#">SS Refresh Course</a>
+    <a href="simulazioni.html">SS Simulazioni</a>
+    <a href="testss.html">Test SS</a>
+    <a target="_blank" href="https://drive.google.com/file/d/11TPu4jPJ6GiQlLAuFh5W8hgVyQErEre5/view?usp=sharing">SS Guide</a>
+</div>
+
+<div class="header">
+    <h1>SS Refresh Course</h1>
+</div>
+
+<div class="fancy-box" id="fancyBox">
+<h3>👨‍🎓 SS Refresh Course</h2><br>
+
+❕ Sei un aspirante SS Verified e vorresti studiare per diventarlo, sei nel posto giusto! <br><br>
+
+🌴 Scrivi a <a class="textbtn" target="_blank" href="https://t.me/GiovaSpezia">@GiovaSpezia</a> oppure a <a class="textbtn" target="_blank" href="https://t.me/itsCARRY">@itsCARRY</a>.
+
+</div>
+
+<div class="image-section">
+    <div class="image-container">
+        <img src="check.png" alt="Immagine 1">
+    </div>
+</div>
+
+<div class="top-arrow" onclick="scrollToTop()">Torna Su</div>
+
+<div class="footer">
+    <p>CoralMC © 2024</p>
+</div>
+
+<script>
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function copyCodeToClipboard(codeId) {
+        var codeSnippet = document.getElementById(codeId);
+        var textArea = document.createElement("textarea");
+        textArea.value = codeSnippet.textContent;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        alert("Copiato con successo!");
+    }
+</script>
+</body>
+</html>
